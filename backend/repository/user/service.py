@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 class UserRepositoryService(interface.AbstractUserRepository):
     """Repository service for user data access."""
     
-    def create(self, user_data: interface.UserData) -> interface.UserDTO:
-        logger.info(f"Creating user with email: {user_data.email}", extra={"input": {"email": user_data.email}})
+    def create(self, user_data: interface.UserCreateRequest) -> interface.UserDTO:
+        logger.info(f"Creating user with username: {user_data.username}, user data: {user_data}")
         
         try:
             user = User()
@@ -29,19 +29,16 @@ class UserRepositoryService(interface.AbstractUserRepository):
             user.last_name = user_data.last_name
             user.is_active = user_data.is_active
             user.is_verified = user_data.is_verified
-            # Timestamps are provided by usecase layer
-            if user_data.created_at:
-                user.created_at = user_data.created_at
-            if user_data.updated_at:
-                user.updated_at = user_data.updated_at
+            user.created_at = user_data.created_at
+            user.updated_at = user_data.updated_at
             user.save()
             
             result = interface.UserDTO.from_model(user)
             logger.info(f"User created successfully: {result.user_id}", extra={"output": result.model_dump()})
             return result
         except IntegrityError as e:
-            logger.warning(f"Failed to create user - email already exists: {user_data.email}")
-            raise interface.UserEmailAlreadyExistsException(user_data.email)
+            logger.warning(f"Failed to create user - username already exists: {user_data.email}")
+            raise interface.UserUsernameAlreadyExistsException(user_data.email)
     
     def get_by_id(self, user_id: int) -> interface.UserDTO | None:
         logger.info(f"Fetching user by id: {user_id}", extra={"input": {"user_id": user_id}})
@@ -61,30 +58,32 @@ class UserRepositoryService(interface.AbstractUserRepository):
         try:
             user = User.objects.get(email=email)
             result = interface.UserDTO.from_model(user)
-            logger.info(f"User fetched by email: {email}", extra={"output": result.model_dump()})
+            logger.info(f'result: {result}')
             return result
         except User.DoesNotExist:
             logger.info(f"User not found by email: {email}")
+            return None
+
+    def get_by_username(self, username: str) -> interface.UserDTO | None:
+        logger.info(f"Fetching user by username: {username}")
+
+        try:
+            user = User.objects.get(username=username)
+            result = interface.UserDTO.from_model(user)
+            logger.info(f'result: {result}')
+            return result
+        except User.DoesNotExist:
+            logger.info(f"User not found by username: {username}")
             return None
     
     def get_users(self, filters: interface.UserFilter) -> list[interface.UserDTO]:
         logger.info(f"Filtering users", extra={"input": filters.model_dump()})
         
-        queryset = User.objects.all()
-        
-        # Apply filters
+
         filter_dict = filters.as_dict()
-        if filters.email:
-            queryset = queryset.filter(email__icontains=filters.email)
-        if filters.is_active is not None:
-            queryset = queryset.filter(is_active=filters.is_active)
-        if filters.is_verified is not None:
-            queryset = queryset.filter(is_verified=filters.is_verified)
-        if filters.created_after:
-            queryset = queryset.filter(created_at__gte=filters.created_after)
-        if filters.created_before:
-            queryset = queryset.filter(created_at__lte=filters.created_before)
-        
+
+        queryset = User.objects.filter(**filter_dict)
+
         # Apply ordering
         queryset = queryset.order_by(filters.order_by)
         
@@ -96,7 +95,7 @@ class UserRepositoryService(interface.AbstractUserRepository):
         logger.info(f"Found {len(results)} users matching filter", extra={"output": {"count": len(results)}})
         return results
     
-    def update(self, user_id: int, user_data: interface.UserData) -> interface.UserDTO:
+    def update(self, user_id: int, user_data: interface.UserUpdateRequest) -> interface.UserDTO:
         logger.info(f"Updating user: {user_id}", extra={"input": {"user_id": user_id}})
         
         try:
@@ -106,6 +105,8 @@ class UserRepositoryService(interface.AbstractUserRepository):
             raise interface.UserNotFoundByIdException(user_id)
         
         # Update fields if provided
+        if user_data.username:
+            user.username = user_data.username
         if user_data.email:
             user.email = user_data.email
         if user_data.password:

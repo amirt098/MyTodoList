@@ -38,12 +38,12 @@ This document breaks down the My Todo List project into manageable development p
 **Deliverables:**
 - [x] Project architecture documentation
 - [x] Requirements documentation
-- [ ] Django project initialization
-- [ ] Directory structure creation (following Clean Architecture)
-- [ ] Database setup (PostgreSQL/SQLite for dev)
-- [ ] Basic Django settings configuration
-- [ ] Bootstrapper implementation
-- [ ] Basic URL routing
+- [x] Django project initialization
+- [x] Directory structure creation (following Clean Architecture)
+- [x] Database setup (PostgreSQL/SQLite for dev)
+- [x] Basic Django settings configuration
+- [x] Bootstrapper implementation
+- [x] Basic URL routing
 - [ ] Development environment setup
 - [ ] CI/CD pipeline basics
 - [ ] Code quality tools (linting, formatting)
@@ -88,15 +88,15 @@ This document breaks down the My Todo List project into manageable development p
 **Duration:** 1-2 weeks
 
 **Deliverables:**
-- [ ] User model (repository layer)
-- [ ] User repository service (with logging)
-- [ ] UserManagementService (consolidated: register, login, password_recovery, update_profile)
-- [ ] All DTOs as Pydantic models (extending lib.base_models)
-- [ ] REST API endpoints for auth
+- [x] User model (repository layer)
+- [x] User repository service (with logging)
+- [x] UserManagementService (consolidated: register, login, password_recovery, update_profile)
+- [x] All DTOs as Pydantic models (extending lib.base_models)
+- [x] REST API endpoints for auth
 - [ ] JWT/Token authentication
 - [ ] Email verification (basic)
-- [ ] User profile endpoints
-- [ ] All methods with input/output logging
+- [x] User profile endpoints
+- [x] All methods with input/output logging
 
 **Technical Tasks:**
 1. Create `repository/user/`:
@@ -141,14 +141,14 @@ This document breaks down the My Todo List project into manageable development p
 **Duration:** 2-3 weeks
 
 **Deliverables:**
-- [ ] Todo model (repository layer)
-- [ ] Todo repository service (with logging)
-- [ ] TodoManagementService (consolidated: create, update, delete, get, list)
-- [ ] All DTOs as Pydantic models
-- [ ] REST API endpoints
+- [x] Todo model (repository layer)
+- [x] Todo repository service (with logging)
+- [x] TodoManagementService (consolidated: create, update, delete, get, list)
+- [x] All DTOs as Pydantic models
+- [x] REST API endpoints
 - [ ] Basic todo list view (web)
 - [ ] Basic todo detail view (web)
-- [ ] All methods with input/output logging
+- [x] All methods with input/output logging
 
 **Technical Tasks:**
 1. Create `repository/todo/`:
@@ -198,15 +198,15 @@ This document breaks down the My Todo List project into manageable development p
 **Duration:** 1-2 weeks
 
 **Deliverables:**
-- [ ] Category management
-- [ ] Label/tag system
-- [ ] Filter todos by category
-- [ ] Filter todos by label
-- [ ] Filter todos by priority
-- [ ] Filter todos by status
-- [ ] Filter todos by deadline
-- [ ] Sort todos (newest, deadline, priority)
-- [ ] Search todos by title/description
+- [x] Category management (category field exists in Todo model)
+- [x] Label/tag system (labels field exists in Todo model)
+- [x] Filter todos by category
+- [x] Filter todos by label
+- [x] Filter todos by priority
+- [x] Filter todos by status
+- [x] Filter todos by deadline
+- [x] Sort todos (newest, deadline, priority)
+- [x] Search todos by title/description
 
 **Technical Tasks:**
 1. Enhance Todo model:
@@ -242,16 +242,16 @@ This document breaks down the My Todo List project into manageable development p
 **Duration:** 2-3 weeks
 
 **Deliverables:**
-- [ ] Project model
-- [ ] Project repository service
-- [ ] Create project usecase
-- [ ] Update project usecase
-- [ ] Delete project usecase
-- [ ] Project member management
-- [ ] Role-based access control (Owner, Admin, Member)
-- [ ] Assign todos to projects
+- [x] Project model
+- [x] Project repository service
+- [x] Create project usecase
+- [x] Update project usecase
+- [x] Delete project usecase
+- [x] Project member management
+- [x] Role-based access control (Owner, Admin, Member)
+- [x] Assign todos to projects (project_id field already exists in Todo model)
 - [ ] Project dashboard (basic stats)
-- [ ] REST API endpoints
+- [x] REST API endpoints
 - [ ] Web UI for projects
 
 **Technical Tasks:**
@@ -308,15 +308,15 @@ This document breaks down the My Todo List project into manageable development p
 **Duration:** 2-3 weeks
 
 **Deliverables:**
-- [ ] Kanban board model (columns configuration)
-- [ ] Kanban board service
-- [ ] Get kanban board usecase
-- [ ] Update todo status via drag & drop
-- [ ] Custom columns support
-- [ ] Card display (title, labels, priority, deadline, progress)
+- [x] Kanban board model (columns configuration)
+- [x] Kanban board service
+- [x] Get kanban board usecase
+- [x] Update todo status via drag & drop (move_todo endpoint)
+- [x] Custom columns support
+- [x] Card display (title, labels, priority, deadline, progress)
 - [ ] Drag & drop functionality (frontend)
 - [ ] Real-time updates (WebSocket or polling)
-- [ ] REST API endpoints
+- [x] REST API endpoints
 - [ ] Web UI with Kanban board
 
 **Technical Tasks:**
@@ -368,13 +368,13 @@ This document breaks down the My Todo List project into manageable development p
 **Duration:** 2-3 weeks
 
 **Deliverables:**
-- [ ] Subtask model and management
-- [ ] Todo dependencies (previous/next)
+- [x] Subtask model and management
+- [x] Todo dependencies (previous/next)
 - [ ] File attachments
-- [ ] Auto-repeat functionality
-- [ ] Progress calculation (based on subtasks)
-- [ ] Dependency validation
-- [ ] REST API endpoints
+- [x] Auto-repeat functionality (already in Todo model)
+- [x] Progress calculation (based on subtasks)
+- [x] Dependency validation
+- [x] REST API endpoints
 - [ ] Web UI updates
 
 **Technical Tasks:**
@@ -452,13 +452,13 @@ This document breaks down the My Todo List project into manageable development p
 **Duration:** 1-2 weeks
 
 **Deliverables:**
-- [ ] Unified "All My Todos" view
-- [ ] Advanced filtering (combine multiple criteria)
-- [ ] Complex queries (date ranges, multiple projects, etc.)
-- [ ] Saved filters
-- [ ] Export functionality
-- [ ] Bulk operations
-- [ ] REST API endpoints
+- [x] Unified "All My Todos" view
+- [x] Advanced filtering (combine multiple criteria)
+- [x] Complex queries (date ranges, multiple projects, etc.)
+- [x] Saved filters
+- [x] Export functionality
+- [x] Bulk operations
+- [x] REST API endpoints
 - [ ] Web UI with advanced filters
 
 **Technical Tasks:**
@@ -515,15 +515,15 @@ This document breaks down the My Todo List project into manageable development p
 **Duration:** 2-3 weeks
 
 **Deliverables:**
-- [ ] Reminder model
-- [ ] Reminder service
-- [ ] Create reminder usecase
-- [ ] Scheduled reminder processor
-- [ ] Email notifications
-- [ ] SMS notifications (basic)
-- [ ] Smart reminders (deadline proximity, overdue)
-- [ ] Reminder settings per user
-- [ ] REST API endpoints
+- [x] Reminder model
+- [x] Reminder service
+- [x] Create reminder usecase
+- [x] Scheduled reminder processor
+- [x] Email notifications
+- [x] SMS notifications (basic)
+- [ ] Smart reminders (deadline proximity, overdue) - can be added later
+- [ ] Reminder settings per user - can be added later
+- [x] REST API endpoints
 - [ ] Web UI for reminders
 
 **Technical Tasks:**
@@ -643,19 +643,19 @@ This document breaks down the My Todo List project into manageable development p
 **Duration:** 3-4 weeks
 
 **Deliverables:**
-- [ ] LLM client integration
-- [ ] Free text analysis usecase
-- [ ] Smart todo creation from text
-- [ ] Auto-categorization
-- [ ] Priority detection
-- [ ] Deadline suggestion
-- [ ] Subtask generation
-- [ ] Project detection
-- [ ] Next action suggestions
-- [ ] Conversational interface
-- [ ] Prompt engineering
-- [ ] Fallback mechanisms
-- [ ] REST API endpoints
+- [x] LLM client integration
+- [x] Free text analysis usecase
+- [x] Smart todo creation from text
+- [x] Auto-categorization
+- [x] Priority detection
+- [x] Deadline suggestion
+- [x] Subtask generation
+- [x] Project detection
+- [x] Next action suggestions
+- [x] Conversational interface
+- [ ] Prompt engineering (basic implementation done)
+- [x] Fallback mechanisms
+- [x] REST API endpoints
 - [ ] Web UI for AI features
 
 **Technical Tasks:**

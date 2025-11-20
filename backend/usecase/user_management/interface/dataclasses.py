@@ -1,12 +1,11 @@
 # Standard library
-from datetime import datetime
 from typing import Optional
 
 # Third-party
 from pydantic import EmailStr, Field
 
 # Internal - from other modules
-from lib.base_models import BaseRequest, BaseResponse, BaseFilter
+from lib.base_models import BaseRequest, BaseResponse
 
 # Internal - from same interface module
 # (none needed)
@@ -14,33 +13,21 @@ from lib.base_models import BaseRequest, BaseResponse, BaseFilter
 
 class RegisterUserRequest(BaseRequest):
     """Request DTO for user registration."""
-    email: EmailStr
+    email: EmailStr | None = None
+    username: str
     password: str = Field(..., min_length=8)
     phone: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    
-    def to_user_data(self, created_at, updated_at):
-        """Convert to UserData for repository."""
-        from repository.user.interface.dataclasses import UserData
-        return UserData(
-            email=self.email,
-            password=self.password,
-            phone=self.phone,
-            first_name=self.first_name,
-            last_name=self.last_name,
-            is_active=True,
-            is_verified=False,
-            created_at=created_at,
-            updated_at=updated_at
-        )
+    is_active: bool = True
+    is_verified: bool = False
 
 
 class RegisterUserResponse(BaseResponse):
     """Response DTO for user registration."""
     user_id: int
     email: str
-    created_at: datetime
+    created_at: int
 
 
 class LoginRequest(BaseRequest):
@@ -73,21 +60,6 @@ class UpdateProfileRequest(BaseRequest):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     phone: Optional[str] = None
-    
-    def to_user_data(self, updated_at):
-        """Convert to UserData for repository update."""
-        from repository.user.interface.dataclasses import UserData
-        return UserData(
-            email="",  # Not updating email
-            password="",  # Not updating password
-            phone=self.phone,
-            first_name=self.first_name,
-            last_name=self.last_name,
-            is_active=None,  # Not updating
-            is_verified=None,  # Not updating
-            created_at=None,  # Not updating
-            updated_at=updated_at
-        )
 
 
 class UpdateProfileResponse(BaseResponse):
@@ -97,5 +69,5 @@ class UpdateProfileResponse(BaseResponse):
     first_name: Optional[str]
     last_name: Optional[str]
     phone: str
-    updated_at: datetime
+    updated_at: int
 

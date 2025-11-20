@@ -62,6 +62,14 @@ class UserRegistrationEmailExistsException(UserManagementBadRequestException):
         super().__init__(message, code="REGISTRATION_EMAIL_EXISTS")
 
 
+class UserRegistrationUsernameExistsException(UserManagementBadRequestException):
+    """Exception raised when trying to register a user with an existing username."""
+    
+    def __init__(self, username: str):
+        message = f"User with username {username} already exists"
+        super().__init__(message, code="REGISTRATION_USERNAME_EXISTS")
+
+
 class UserLoginInvalidCredentialsException(UserManagementUnauthorizedException):
     """Exception raised when login credentials are invalid."""
     

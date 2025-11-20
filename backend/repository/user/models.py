@@ -11,16 +11,16 @@ from django.contrib.auth.hashers import make_password, check_password
 
 class User(models.Model):
     """User model - no cross-module relationships."""
-    
-    email = models.EmailField(unique=True, db_index=True)
+    username = models.CharField(unique=True, max_length=30)
+    email = models.EmailField(unique=True, null=True, blank=True)
     password = models.CharField(max_length=255)
     phone = models.CharField(max_length=20, blank=True)
     first_name = models.CharField(max_length=100, null=True, blank=True)
     last_name = models.CharField(max_length=100, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.BigIntegerField()
+    updated_at = models.BigIntegerField()
     
     class Meta:
         db_table = 'users'

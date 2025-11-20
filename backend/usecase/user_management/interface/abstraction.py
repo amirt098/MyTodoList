@@ -8,12 +8,6 @@ from .dataclasses import (
     PasswordRecoveryRequest, PasswordRecoveryResponse,
     UpdateProfileRequest, UpdateProfileResponse
 )
-from .exceptions import (
-    UserRegistrationEmailExistsException,
-    UserLoginInvalidCredentialsException,
-    UserLoginInactiveAccountException,
-    UserProfileNotFoundException
-)
 
 
 class AbstractUserManagementService(ABC):
@@ -24,17 +18,15 @@ class AbstractUserManagementService(ABC):
         """
         Register a new user in the system.
         
-        Validates email availability, creates user account, and sends verification SMS.
-        Groups: registration, user creation
-        
         Args:
-            request: Registration request with email, password, and phone
+            request: Registration request with username, email, password, and optional fields
             
         Returns:
             RegisterUserResponse with user_id, email, and created_at
             
         Raises:
             UserRegistrationEmailExistsException: If email is already registered
+            UserRegistrationUsernameExistsException: If username is already registered
         """
         pass
     
@@ -43,14 +35,11 @@ class AbstractUserManagementService(ABC):
         """
         Authenticate user and return access token.
         
-        Validates credentials and generates JWT token for session management.
-        Groups: authentication, login
-        
         Args:
             request: Login request with email and password
             
         Returns:
-            LoginResponse with user_id and JWT token
+            LoginResponse with user_id and token
             
         Raises:
             UserLoginInvalidCredentialsException: If credentials are invalid
@@ -65,7 +54,6 @@ class AbstractUserManagementService(ABC):
         
         Sends password recovery email with reset link. For security, always returns
         success message even if user doesn't exist.
-        Groups: password recovery, authentication
         
         Args:
             request: Password recovery request with email
@@ -79,9 +67,6 @@ class AbstractUserManagementService(ABC):
     def update_profile(self, request: UpdateProfileRequest) -> UpdateProfileResponse:
         """
         Update user profile information.
-        
-        Updates user's profile fields (first_name, last_name, phone).
-        Groups: profile management, user updates
         
         Args:
             request: Update request with user_id and fields to update

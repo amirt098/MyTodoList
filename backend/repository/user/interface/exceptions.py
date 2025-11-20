@@ -61,6 +61,13 @@ class UserEmailAlreadyExistsException(UserBadRequestException):
         message = f"User with email {email} already exists"
         super().__init__(message, code="USER_EMAIL_EXISTS")
 
+class UserUsernameAlreadyExistsException(UserBadRequestException):
+    """Exception raised when trying to create a user with an existing username."""
+
+    def __init__(self, username: str):
+        message = f"User with username {username} already exists"
+        super().__init__(message, code="USER_NAME_EXISTS")
+
 
 class UserEmailConflictException(UserBadRequestException):
     """Exception raised when trying to update a user with an email that's already in use."""

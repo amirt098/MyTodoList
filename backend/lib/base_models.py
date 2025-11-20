@@ -9,6 +9,7 @@ from pydantic import FieldValidationInfo
 # Internal
 # (none needed)
 
+BaseModel = BaseModel
 
 class BaseRequest(BaseModel):
     """Base class for all request DTOs."""

@@ -2,14 +2,14 @@
 from abc import ABC, abstractmethod
 
 # Internal - from same interface module (direct import, no interface. prefix needed)
-from .dataclasses import UserData, UserDTO, UserFilter
+from .dataclasses import UserDTO, UserFilter, UserUpdateRequest, UserCreateRequest
 
 
 class AbstractUserRepository(ABC):
     """Interface for user repository operations."""
     
     @abstractmethod
-    def create(self, user_data: UserData) -> UserDTO:
+    def create(self, user_data: UserCreateRequest) -> UserDTO:
         """
         Create a new user in the database.
         
@@ -20,7 +20,7 @@ class AbstractUserRepository(ABC):
             UserDTO with created user information
             
         Raises:
-            UserEmailAlreadyExistsException: If email already exists
+            UserNameAlreadyExistsException: If username already exists
         """
         pass
     
@@ -49,7 +49,20 @@ class AbstractUserRepository(ABC):
             UserDTO if found, None otherwise
         """
         pass
-    
+
+    @abstractmethod
+    def get_by_username(self, username: str) -> UserDTO | None:
+        """
+        Get user by email.
+
+        Args:
+            username: UserName to fetch
+
+        Returns:
+            UserDTO if found, None otherwise
+        """
+        pass
+
     @abstractmethod
     def get_users(self, filters: UserFilter) -> list[UserDTO]:
         """
@@ -66,7 +79,7 @@ class AbstractUserRepository(ABC):
         pass
     
     @abstractmethod
-    def update(self, user_id: int, user_data: UserData) -> UserDTO:
+    def update(self, user_id: int, user_data: UserUpdateRequest) -> UserDTO:
         """
         Update an existing user.
         

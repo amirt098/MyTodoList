@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,6 +32,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# DeepSeek LLM Configuration
+# Set DEEPSEEK_API_KEY in environment variables or here
+# Get your API key from: https://platform.deepseek.com/
+DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
+DEEPSEEK_API_BASE_URL = os.getenv('DEEPSEEK_API_BASE_URL', 'https://api.deepseek.com/v1')
+DEEPSEEK_MODEL = os.getenv('DEEPSEEK_MODEL', 'deepseek-chat')
+
 
 # Application definition
 
@@ -43,6 +51,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Project modules
     'repository.user',
+    'repository.todo',
+    'repository.project',
+    'repository.kanban',
+    'repository.subtask',
+    'repository.saved_filter',
+    'repository.reminder',
 ]
 
 MIDDLEWARE = [

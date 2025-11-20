@@ -49,10 +49,11 @@ This architecture document is split into multiple files for better organization 
 ## Quick Navigation
 
 ### For New Developers
-1. Start with [ARCHITECTURE_LAYERS.md](./ARCHITECTURE_LAYERS.md) to understand the overall architecture
-2. Read [ARCHITECTURE_DEPENDENCIES.md](./ARCHITECTURE_DEPENDENCIES.md) to understand dependency rules
-3. Review [ARCHITECTURE_EXAMPLES.md](./ARCHITECTURE_EXAMPLES.md) to see code patterns
-4. Study [ARCHITECTURE_CODE_STANDARDS.md](./ARCHITECTURE_CODE_STANDARDS.md) for coding guidelines
+1. Start with [ARCHITECTURE_QUICK_REFERENCE.md](./ARCHITECTURE_QUICK_REFERENCE.md) for a quick overview
+2. Read [ARCHITECTURE_LAYERS.md](./ARCHITECTURE_LAYERS.md) to understand the overall architecture
+3. Review [ARCHITECTURE_DEPENDENCIES.md](./ARCHITECTURE_DEPENDENCIES.md) to understand dependency rules
+4. Study [ARCHITECTURE_EXAMPLES.md](./ARCHITECTURE_EXAMPLES.md) to see code patterns
+5. Follow [ARCHITECTURE_CODE_STANDARDS.md](./ARCHITECTURE_CODE_STANDARDS.md) for coding guidelines
 
 ### For Implementation
 1. [ARCHITECTURE_STRUCTURE.md](./ARCHITECTURE_STRUCTURE.md) - Set up directory structure
@@ -67,6 +68,9 @@ This architecture document is split into multiple files for better organization 
 - [ARCHITECTURE_TIMESTAMPS.md](./ARCHITECTURE_TIMESTAMPS.md) - Timestamp management
 - [ARCHITECTURE_LIB.md](./ARCHITECTURE_LIB.md) - Base components reference
 - [ARCHITECTURE_GLOSSARY.md](./ARCHITECTURE_GLOSSARY.md) - Terminology
+
+### Quick Reference
+- **[ARCHITECTURE_QUICK_REFERENCE.md](./ARCHITECTURE_QUICK_REFERENCE.md)** - ⚡ Quick reference guide for daily tasks
 
 ---
 

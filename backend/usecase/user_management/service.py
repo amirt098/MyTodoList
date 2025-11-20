@@ -2,7 +2,6 @@
 import logging
 import secrets
 import hashlib
-from datetime import datetime, timezone
 
 # Third-party
 # (none needed)
@@ -10,7 +9,6 @@ from datetime import datetime, timezone
 # Internal - from other modules
 from repository.user import interface as user_repository_interface
 from utils.date_utils import interface as date_utils_interface
-from utils.date_utils import datetime_service
 
 # Internal - from same module
 from . import interface
@@ -23,27 +21,45 @@ class UserManagementService(interface.AbstractUserManagementService):
     
     def __init__(
         self,
-        user_repo: user_repository_interface.AbstractUserRepository
+        user_repo: user_repository_interface.AbstractUserRepository,
+        date_time_service: date_utils_interface.AbstractDateTimeService,
     ):
         self.user_repo = user_repo
+        self.date_time_service = date_time_service
     
     def register_user(self, request: interface.RegisterUserRequest) -> interface.RegisterUserResponse:
-        logger.info(f"Registering user with email: {request.email}", extra={"input": request.model_dump()})
+        logger.info(f"Registering user with username: {request.username}", extra={"input": request.model_dump()})
         
-        # Check if user already exists
-        existing_user = self.user_repo.get_by_email(request.email)
+        # Check if user already exists by email
+        if request.email:
+            existing_user = self.user_repo.get_by_email(request.email)
+            if existing_user:
+                logger.warning(f"Registration failed - email already exists: {request.email}")
+                raise interface.UserRegistrationEmailExistsException(request.email)
+        
+        # Check if username already exists
+        existing_user = self.user_repo.get_by_username(request.username)
         if existing_user:
-            logger.warning(f"Registration failed - email already exists: {request.email}")
-            raise interface.UserRegistrationEmailExistsException(request.email)
+            logger.warning(f"Registration failed - username already exists: {request.username}")
+            raise interface.UserRegistrationUsernameExistsException(request.username)
         
-        # Calculate timestamps in usecase layer
-        now_dto = datetime_service.now()
-        created_at = datetime.fromtimestamp(now_dto.timestamp_ms / 1000, tz=timezone.utc)
-        updated_at = datetime.fromtimestamp(now_dto.timestamp_ms / 1000, tz=timezone.utc)
+        now_dto = self.date_time_service.now()
         
-        # Create user with timestamps
-        user_data = request.to_user_data(created_at, updated_at)
-        user_dto = self.user_repo.create(user_data)
+        # Create UserCreateRequest with timestamps
+        user_create_request = user_repository_interface.UserCreateRequest(
+            email=request.email,
+            username=request.username,
+            password=request.password,
+            phone=request.phone,
+            first_name=request.first_name,
+            last_name=request.last_name,
+            is_active=request.is_active,
+            is_verified=request.is_verified,
+            created_at=now_dto,
+            updated_at=now_dto
+        )
+        
+        user_dto = self.user_repo.create(user_create_request)
         
         response = interface.RegisterUserResponse(
             user_id=user_dto.user_id,
@@ -120,12 +136,23 @@ class UserManagementService(interface.AbstractUserManagementService):
             raise interface.UserProfileNotFoundException(request.user_id)
         
         # Calculate updated timestamp in usecase layer
-        now_dto = datetime_service.now()
-        updated_at = datetime.fromtimestamp(now_dto.timestamp_ms / 1000, tz=timezone.utc)
+        now_dto = self.date_time_service.now()
+
+        # Create UserUpdateRequest with only provided fields
+        user_update_request = user_repository_interface.UserUpdateRequest(
+            email=None,  # Not updating email
+            username=None,  # Not updating username
+            password=None,  # Not updating password
+            phone=request.phone,
+            first_name=request.first_name,
+            last_name=request.last_name,
+            is_active=None,  # Not updating
+            is_verified=None,  # Not updating
+            created_at=None,  # Not updating
+            updated_at=now_dto
+        )
         
-        # Update user with timestamp
-        user_data = request.to_user_data(updated_at)
-        updated_user_dto = self.user_repo.update(request.user_id, user_data)
+        updated_user_dto = self.user_repo.update(request.user_id, user_update_request)
         
         response = interface.UpdateProfileResponse(
             user_id=updated_user_dto.user_id,
