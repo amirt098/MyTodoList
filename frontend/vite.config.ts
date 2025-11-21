@@ -12,10 +12,23 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    strictPort: false, // Allow Vite to use another port if 3000 is in use
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
+        secure: false,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Proxying request:', req.method, req.url, '->', proxyReq.path);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Proxy response:', req.method, req.url, '->', proxyRes.statusCode);
+          });
+        },
       },
     },
   },

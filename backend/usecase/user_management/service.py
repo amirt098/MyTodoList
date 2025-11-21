@@ -55,15 +55,15 @@ class UserManagementService(interface.AbstractUserManagementService):
             last_name=request.last_name,
             is_active=request.is_active,
             is_verified=request.is_verified,
-            created_at=now_dto,
-            updated_at=now_dto
+            created_at=now_dto.timestamp_ms,
+            updated_at=now_dto.timestamp_ms
         )
         
         user_dto = self.user_repo.create(user_create_request)
         
         response = interface.RegisterUserResponse(
             user_id=user_dto.user_id,
-            email=user_dto.email,
+            email=user_dto.email or "",  # Ensure email is not None
             created_at=user_dto.created_at
         )
         
@@ -92,6 +92,10 @@ class UserManagementService(interface.AbstractUserManagementService):
         
         # Generate token (simple implementation - should use JWT in production)
         token = self._generate_token(user_dto.user_id, user_dto.email)
+        
+        # Store token for verification (in production, use Redis or database)
+        from presentation.rest.auth_utils import store_token
+        store_token(token, user_dto.user_id)
         
         response = interface.LoginResponse(
             user_id=user_dto.user_id,

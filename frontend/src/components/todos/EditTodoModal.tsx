@@ -1,37 +1,44 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { todoApi, projectApi } from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
 import Button from '../ui/Button'
 import { X } from 'lucide-react'
+import { Todo } from '../../types'
 
-interface CreateTodoModalProps {
+interface EditTodoModalProps {
+  todo: Todo
   onClose: () => void
   onSuccess: () => void
-  projectId?: number
 }
 
-export default function CreateTodoModal({ onClose, onSuccess, projectId }: CreateTodoModalProps) {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [priority, setPriority] = useState('Medium')
-  const [status, setStatus] = useState('ToDo')
-  const [category, setCategory] = useState('')
-  const [labels, setLabels] = useState('')
-  const [deadline, setDeadline] = useState('')
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(projectId || null)
+export default function EditTodoModal({ todo, onClose, onSuccess }: EditTodoModalProps) {
+  const { user } = useAuthStore()
+  const userId = user?.user_id || 1
+  const [title, setTitle] = useState(todo.title)
+  const [description, setDescription] = useState(todo.description || '')
+  const [priority, setPriority] = useState(todo.priority)
+  const [status, setStatus] = useState(todo.status)
+  const [category, setCategory] = useState(todo.category || '')
+  const [labels, setLabels] = useState(todo.labels?.join(', ') || '')
+  const [deadline, setDeadline] = useState(
+    todo.deadline_timestamp_ms
+      ? new Date(todo.deadline_timestamp_ms).toISOString().slice(0, 16)
+      : ''
+  )
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(todo.project_id || null)
   const queryClient = useQueryClient()
 
-  // Fetch projects for project selection
   const { data: projectsResponse } = useQuery({
     queryKey: ['projects'],
     queryFn: () => projectApi.getProjects({}),
   })
-  const projects = Array.isArray(projectsResponse) ? projectsResponse : (projectsResponse as any)?.projects || []
+  const projects = Array.isArray(projectsResponse) ? projectsResponse : projectsResponse?.projects || []
 
   const mutation = useMutation({
-    mutationFn: (data: any) => todoApi.createTodo(data),
+    mutationFn: (data: any) => todoApi.updateTodo(todo.todo_id, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todo', todo.todo_id] })
       queryClient.invalidateQueries({ queryKey: ['todos'] })
       queryClient.invalidateQueries({ queryKey: ['kanban', 'board'] })
       onSuccess()
@@ -41,16 +48,13 @@ export default function CreateTodoModal({ onClose, onSuccess, projectId }: Creat
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Parse labels (comma-separated)
     const labelsArray = labels.split(',').map(l => l.trim()).filter(l => l.length > 0)
     
-    // Convert deadline to ISO string format if provided
-    // Backend expects format: "YYYY-MM-DDTHH:MM:SS"
-    // datetime-local input gives us "YYYY-MM-DDTHH:MM", so we add ":00" for seconds
-    let deadlineString: string | null = null
+    // Convert deadline to timestamp_ms if provided
+    // UpdateTodoRequest expects deadline_timestamp_ms (number), not deadline (string)
+    let deadlineTimestamp: number | null = null
     if (deadline) {
-      // datetime-local format is "YYYY-MM-DDTHH:MM", backend needs "YYYY-MM-DDTHH:MM:SS"
-      deadlineString = deadline + ':00'
+      deadlineTimestamp = new Date(deadline).getTime()
     }
 
     mutation.mutate({
@@ -60,17 +64,16 @@ export default function CreateTodoModal({ onClose, onSuccess, projectId }: Creat
       status,
       category: category || null,
       labels: labelsArray.length > 0 ? labelsArray : null,
-      deadline: deadlineString,
+      deadline_timestamp_ms: deadlineTimestamp,
       project_id: selectedProjectId || null,
-      // user_id comes from auth token
     })
   }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Create New Todo</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Edit Todo</h2>
           <button
             onClick={onClose}
             className="p-1 text-gray-400 hover:text-gray-600"
@@ -181,25 +184,23 @@ export default function CreateTodoModal({ onClose, onSuccess, projectId }: Creat
             />
           </div>
 
-          {!projectId && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Project (optional)
-              </label>
-              <select
-                value={selectedProjectId || ''}
-                onChange={(e) => setSelectedProjectId(e.target.value ? parseInt(e.target.value) : null)}
-                className="input"
-              >
-                <option value="">No project</option>
-                {projects.map((project: any) => (
-                  <option key={project.project_id} value={project.project_id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Project (optional)
+            </label>
+            <select
+              value={selectedProjectId || ''}
+              onChange={(e) => setSelectedProjectId(e.target.value ? parseInt(e.target.value) : null)}
+              className="input"
+            >
+              <option value="">No project</option>
+              {projects.map((project: any) => (
+                <option key={project.project_id} value={project.project_id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="flex gap-3 pt-4">
             <Button
@@ -215,7 +216,7 @@ export default function CreateTodoModal({ onClose, onSuccess, projectId }: Creat
               className="flex-1"
               disabled={mutation.isPending}
             >
-              {mutation.isPending ? 'Creating...' : 'Create Todo'}
+              {mutation.isPending ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </form>

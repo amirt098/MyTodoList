@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.http import JsonResponse
+from django.views import View
 
 # Internal - from other modules
 from presentation.rest.auth_views import (
@@ -84,7 +86,31 @@ from presentation.rest.ai_views import (
     ConversationalQueryView
 )
 
+
+class APIRootView(View):
+    """Root API endpoint that provides API information."""
+    
+    def get(self, request):
+        return JsonResponse({
+            "message": "MyTodoList API",
+            "version": "1.0.0",
+            "status": "running",
+            "endpoints": {
+                "auth": "/api/auth/",
+                "todos": "/api/todos/",
+                "projects": "/api/projects/",
+                "kanban": "/api/kanban/",
+                "reminders": "/api/reminders/",
+                "ai": "/api/ai/",
+                "filters": "/api/filters/",
+                "admin": "/admin/"
+            },
+            "frontend": "http://localhost:3000"
+        })
+
+
 urlpatterns = [
+    path('', APIRootView.as_view(), name='api-root'),
     path('admin/', admin.site.urls),
     # Auth endpoints
     path('api/auth/register/', RegisterView.as_view(), name='register'),

@@ -83,8 +83,8 @@ class UserDTO(BaseModel):
         """Create UserDTO from Django User model."""
         return cls(
             user_id=user.id,
-            email=user.email,
-            phone=user.phone,
+            email=user.email or "",  # Handle None email
+            phone=user.phone or "",
             first_name=user.first_name,
             last_name=user.last_name,
             is_active=user.is_active,

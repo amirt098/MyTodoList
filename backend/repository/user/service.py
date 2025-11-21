@@ -22,6 +22,7 @@ class UserRepositoryService(interface.AbstractUserRepository):
         
         try:
             user = User()
+            user.username = user_data.username
             user.email = user_data.email
             user.set_password(user_data.password)
             user.phone = user_data.phone or ""

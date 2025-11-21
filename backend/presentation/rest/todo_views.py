@@ -80,8 +80,21 @@ class CreateTodoView(View):
     
     def post(self, request):
         try:
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
+            
             # Parse JSON body
             body = json.loads(request.body)
+            
+            # Override user_id from token (security: user can only create todos for themselves)
+            body['user_id'] = user_id
             
             # Convert deadline from datetime string to timestamp_ms if provided
             if 'deadline' in body and body['deadline']:
@@ -127,8 +140,15 @@ class GetTodoView(View):
     
     def get(self, request, todo_id):
         try:
-            # Get user_id from query params (TODO: should come from authentication)
-            user_id = int(request.GET.get('user_id', 0))
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
             
             # Create request DTO
             get_request = todo_management_interface.GetTodoRequest(
@@ -165,8 +185,15 @@ class GetTodosView(View):
     
     def get(self, request):
         try:
-            # Get user_id from query params (TODO: should come from authentication)
-            user_id = int(request.GET.get('user_id', 0))
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
             
             # Build request from query params (convert datetime strings to timestamp_ms if needed)
             request_data = {
@@ -267,8 +294,15 @@ class DeleteTodoView(View):
     
     def delete(self, request, todo_id):
         try:
-            # Get user_id from query params (TODO: should come from authentication)
-            user_id = int(request.GET.get('user_id', 0))
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
             
             # Create request DTO
             delete_request = todo_management_interface.DeleteTodoRequest(

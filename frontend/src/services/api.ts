@@ -66,7 +66,7 @@ export const apiClient = new ApiClient()
 
 // Auth API
 export const authApi = {
-  register: (data: { email: string; password: string; username?: string }) =>
+  register: (data: { email: string; password: string; username: string }) =>
     apiClient.post('/auth/register/', data),
   
   login: (data: { email: string; password: string }) =>
@@ -185,5 +185,59 @@ export const reminderApi = {
   
   deleteReminder: (id: number) =>
     apiClient.delete(`/reminders/${id}/delete/`),
+}
+
+// Filter API
+export const filterApi = {
+  saveFilter: (data: any) =>
+    apiClient.post('/filters/save/', data),
+  
+  getSavedFilters: (params?: any) =>
+    apiClient.get('/filters/', params),
+  
+  deleteSavedFilter: (id: number) =>
+    apiClient.delete(`/filters/${id}/delete/`),
+}
+
+// Bulk Operations API
+export const bulkApi = {
+  bulkUpdate: (data: any) =>
+    apiClient.post('/todos/bulk-update/', data),
+  
+  bulkDelete: (data: any) =>
+    apiClient.post('/todos/bulk-delete/', data),
+}
+
+// Export API
+export const exportApi = {
+  exportTodos: (params?: any) =>
+    apiClient.get('/todos/export/', params),
+}
+
+// Dependency API
+export const dependencyApi = {
+  setDependency: (data: any) =>
+    apiClient.post('/todos/dependencies/set/', data),
+  
+  removeDependency: (todoId: number, data?: any) =>
+    apiClient.post(`/todos/${todoId}/dependencies/remove/`, data),
+  
+  validateDependency: (todoId: number, params?: any) =>
+    apiClient.get(`/todos/${todoId}/dependencies/validate/`, params),
+  
+  getDependencyChain: (todoId: number, params?: any) =>
+    apiClient.get(`/todos/${todoId}/dependencies/chain/`, params),
+}
+
+// Project Member API
+export const projectMemberApi = {
+  addMember: (projectId: number, data: any) =>
+    apiClient.post(`/projects/${projectId}/members/add/`, data),
+  
+  removeMember: (projectId: number, data: any) =>
+    apiClient.post(`/projects/${projectId}/members/remove/`, data),
+  
+  updateMemberRole: (projectId: number, data: any) =>
+    apiClient.post(`/projects/${projectId}/members/update-role/`, data),
 }
 

@@ -1,15 +1,23 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { projectApi } from '../../services/api'
+import { useAuthStore } from '../../store/authStore'
 import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import { Plus, FolderKanban, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import CreateProjectModal from '../../components/projects/CreateProjectModal'
 
 export default function ProjectsPage() {
-  const { data: projects, isLoading } = useQuery({
+  const [showCreateModal, setShowCreateModal] = useState(false)
+
+  const { data: response, isLoading } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => projectApi.getProjects({ user_id: 1 }),
+    queryFn: () => projectApi.getProjects({}), // user_id comes from auth token
   })
+
+  // Handle both array response and object with projects property
+  const projects = Array.isArray(response) ? response : (response as any)?.projects || []
 
   return (
     <div className="space-y-6 pb-20 lg:pb-6">
@@ -18,7 +26,7 @@ export default function ProjectsPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Projects</h1>
           <p className="text-gray-600 mt-1">Manage your projects and collaborate</p>
         </div>
-        <Button>
+        <Button onClick={() => setShowCreateModal(true)}>
           <Plus className="h-4 w-4 mr-2" />
           New Project
         </Button>
@@ -34,9 +42,9 @@ export default function ProjectsPage() {
             <Button>Create your first project</Button>
           </div>
         </Card>
-      ) : (
+      ) : projects && Array.isArray(projects) && projects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects?.map((project: any) => (
+          {projects.map((project: any) => (
             <Link key={project.project_id} to={`/projects/${project.project_id}`}>
               <Card className="h-full hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
@@ -61,6 +69,24 @@ export default function ProjectsPage() {
             </Link>
           ))}
         </div>
+      ) : (
+        <Card>
+          <div className="text-center py-12">
+            <FolderKanban className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 mb-4">No projects found</p>
+            <Button onClick={() => setShowCreateModal(true)}>Create your first project</Button>
+          </div>
+        </Card>
+      )}
+
+      {/* Create Project Modal */}
+      {showCreateModal && (
+        <CreateProjectModal
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={() => {
+            setShowCreateModal(false)
+          }}
+        />
       )}
     </div>
   )

@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom'
 export default function DashboardPage() {
   const { data: todos, isLoading } = useQuery({
     queryKey: ['todos', 'all'],
-    queryFn: () => todoApi.getAllMyTodos({ user_id: 1 }),
+    queryFn: () => todoApi.getAllMyTodos({}), // user_id comes from auth token
   })
 
   const stats = {

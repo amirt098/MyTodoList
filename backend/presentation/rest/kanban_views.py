@@ -80,8 +80,16 @@ class GetKanbanBoardView(View):
     
     def get(self, request):
         try:
-            # Get user_id and project_id from query params (TODO: should come from authentication)
-            user_id = int(request.GET.get('user_id', 0))
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
+            
             project_id = int(request.GET.get('project_id')) if request.GET.get('project_id') else None
             
             # Create request DTO
@@ -126,8 +134,21 @@ class MoveTodoView(View):
     
     def post(self, request):
         try:
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
+            
             # Parse JSON body
             body = json.loads(request.body)
+            
+            # Override user_id from token (security: user can only move their own todos)
+            body['user_id'] = user_id
             
             # Create request DTO
             move_request = kanban_management_interface.MoveTodoRequest(**body)

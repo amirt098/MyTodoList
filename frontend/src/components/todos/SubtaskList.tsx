@@ -26,7 +26,7 @@ export default function SubtaskList({ todoId, subtasks }: SubtaskListProps) {
 
   const toggleMutation = useMutation({
     mutationFn: ({ subtaskId, done }: { subtaskId: number; done: boolean }) =>
-      subtaskApi.markSubtaskDone(subtaskId, { todo_id: todoId, user_id: 1, done }),
+      subtaskApi.markSubtaskDone(subtaskId, { todo_id: todoId, done }), // user_id comes from auth token
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subtasks', todoId] })
     },
@@ -37,7 +37,7 @@ export default function SubtaskList({ todoId, subtasks }: SubtaskListProps) {
     if (newSubtaskTitle.trim()) {
       addMutation.mutate({
         title: newSubtaskTitle.trim(),
-        user_id: 1,
+        // user_id comes from auth token
       })
     }
   }

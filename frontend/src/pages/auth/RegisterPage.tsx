@@ -46,7 +46,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Username (optional)
+                Username
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -56,6 +56,7 @@ export default function RegisterPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   className="input pl-10"
                   placeholder="johndoe"
+                  required
                 />
               </div>
             </div>

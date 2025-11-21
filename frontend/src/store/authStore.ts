@@ -8,7 +8,7 @@ interface AuthState {
   token: string | null
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, username?: string) => Promise<void>
+  register: (email: string, password: string, username: string) => Promise<void>
   logout: () => void
   updateUser: (user: User) => void
 }
@@ -19,13 +19,19 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      
+        
       login: async (email: string, password: string) => {
         try {
           const response = await authApi.login({ email, password })
-          // Assuming response contains user and token
-          const user = response as any
-          const token = 'mock-token' // Replace with actual token from response
+          // LoginResponse contains user_id, token, and email
+          const user = {
+            user_id: response.user_id,
+            email: response.email,
+            is_active: true,
+            is_verified: false,
+            created_at: Date.now(), // We don't have this from login, use current time
+          }
+          const token = response.token
           
           localStorage.setItem('auth_token', token)
           localStorage.setItem('user', JSON.stringify(user))
@@ -40,12 +46,28 @@ export const useAuthStore = create<AuthState>()(
         }
       },
       
-      register: async (email: string, password: string, username?: string) => {
+      register: async (email: string, password: string, username: string) => {
         try {
-          const response = await authApi.register({ email, password, username })
-          // Assuming response contains user and token
-          const user = response as any
-          const token = 'mock-token' // Replace with actual token from response
+          // Register the user
+          const registerResponse = await authApi.register({ 
+            email, 
+            password, 
+            username
+          })
+          
+          // After successful registration, automatically log in
+          const loginResponse = await authApi.login({ email, password })
+          
+          // LoginResponse contains user_id, token, and email
+          const user = {
+            user_id: loginResponse.user_id,
+            email: loginResponse.email,
+            username: username,
+            is_active: true,
+            is_verified: false,
+            created_at: registerResponse.created_at,
+          }
+          const token = loginResponse.token
           
           localStorage.setItem('auth_token', token)
           localStorage.setItem('user', JSON.stringify(user))
@@ -83,6 +105,24 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        // Recalculate isAuthenticated after rehydration from localStorage
+        if (state) {
+          // Also check the actual localStorage values to ensure consistency
+          const token = localStorage.getItem('auth_token')
+          const userStr = localStorage.getItem('user')
+          const hasValidAuth = !!(token && userStr && state.user && state.token)
+          state.isAuthenticated = hasValidAuth
+          if (!hasValidAuth) {
+            // Clear invalid state
+            state.user = null
+            state.token = null
+            state.isAuthenticated = false
+            localStorage.removeItem('auth_token')
+            localStorage.removeItem('user')
+          }
+        }
+      },
     }
   )
 )

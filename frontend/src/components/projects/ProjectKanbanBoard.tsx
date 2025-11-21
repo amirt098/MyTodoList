@@ -1,30 +1,34 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { kanbanApi } from '../../services/api'
-import { useAuthStore } from '../../store/authStore'
-import Card from '../../components/ui/Card'
+import Card from '../ui/Card'
 import { KanbanColumn, KanbanCard } from '../../types'
 import { Plus } from 'lucide-react'
-import Button from '../../components/ui/Button'
-import CreateTodoModal from '../../components/todos/CreateTodoModal'
+import Button from '../ui/Button'
+import CreateTodoModal from '../todos/CreateTodoModal'
 
-export default function KanbanPage() {
+interface ProjectKanbanBoardProps {
+  projectId: number
+  userId: number
+}
+
+export default function ProjectKanbanBoard({ projectId, userId }: ProjectKanbanBoardProps) {
   const queryClient = useQueryClient()
-  const { user } = useAuthStore()
   const [draggedCard, setDraggedCard] = useState<KanbanCard | null>(null)
   const [draggedOverColumn, setDraggedOverColumn] = useState<string | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const { data: board, isLoading } = useQuery({
-    queryKey: ['kanban', 'board'],
-    queryFn: () => kanbanApi.getBoard({}), // user_id comes from auth token
+    queryKey: ['kanban', 'board', projectId],
+    queryFn: () => kanbanApi.getBoard({ project_id: projectId }), // user_id comes from auth token
   })
 
   const moveTodoMutation = useMutation({
     mutationFn: (data: { todo_id: number; new_status: string; user_id: number; new_order?: number }) =>
       kanbanApi.moveTodo(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['kanban', 'board'] })
+      queryClient.invalidateQueries({ queryKey: ['kanban', 'board', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['todos', 'project', projectId] })
     },
   })
 
@@ -48,7 +52,6 @@ export default function KanbanPage() {
     setDraggedCard(card)
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('text/plain', card.todo_id.toString())
-    // Add visual feedback
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.opacity = '0.5'
     }
@@ -75,18 +78,16 @@ export default function KanbanPage() {
       return
     }
 
-    // Move the todo to the new column
     moveTodoMutation.mutate({
       todo_id: draggedCard.todo_id,
       new_status: targetColumn.status_value,
-      user_id: user?.user_id || 1, // user_id comes from auth token
+      user_id: userId, // user_id comes from auth token
     })
 
     setDraggedCard(null)
   }
 
   const handleDragEnd = (e: React.DragEvent) => {
-    // Reset opacity
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.opacity = '1'
     }
@@ -95,12 +96,9 @@ export default function KanbanPage() {
   }
 
   return (
-    <div className="space-y-6 pb-20 lg:pb-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Kanban Board</h1>
-          <p className="text-gray-600 mt-1">Personal tasks - Visualize and manage your tasks</p>
-        </div>
+        <p className="text-gray-600">Project Kanban Board</p>
         <Button onClick={() => setShowCreateModal(true)}>
           <Plus className="h-4 w-4 mr-2" />
           New Todo
@@ -177,9 +175,10 @@ export default function KanbanPage() {
           onClose={() => setShowCreateModal(false)}
           onSuccess={() => {
             setShowCreateModal(false)
-            queryClient.invalidateQueries({ queryKey: ['kanban', 'board'] })
+            queryClient.invalidateQueries({ queryKey: ['kanban', 'board', projectId] })
+            queryClient.invalidateQueries({ queryKey: ['todos', 'project', projectId] })
           }}
-          projectId={undefined} // Personal todos, not project todos
+          projectId={projectId}
         />
       )}
     </div>

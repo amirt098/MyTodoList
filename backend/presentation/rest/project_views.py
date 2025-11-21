@@ -84,8 +84,21 @@ class CreateProjectView(View):
     
     def post(self, request):
         try:
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
+            
             # Parse JSON body
             body = json.loads(request.body)
+            
+            # Override owner_id from token (security: user can only create projects for themselves)
+            body['owner_id'] = user_id
             
             # Create request DTO
             create_request = project_management_interface.CreateProjectRequest(**body)
@@ -119,8 +132,15 @@ class GetProjectView(View):
     
     def get(self, request, project_id):
         try:
-            # Get user_id from query params (TODO: should come from authentication)
-            user_id = int(request.GET.get('user_id', 0))
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
             
             # Create request DTO
             get_request = project_management_interface.GetProjectRequest(
@@ -157,8 +177,15 @@ class GetProjectsView(View):
     
     def get(self, request):
         try:
-            # Get user_id from query params (TODO: should come from authentication)
-            user_id = int(request.GET.get('user_id', 0))
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
             
             # Build request from query params
             request_data = {
@@ -210,9 +237,20 @@ class UpdateProjectView(View):
     
     def put(self, request, project_id):
         try:
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
+            
             # Parse JSON body
             body = json.loads(request.body)
             body['project_id'] = int(project_id)
+            body['user_id'] = user_id  # Ensure user_id is from token
             
             # Create request DTO
             update_request = project_management_interface.UpdateProjectRequest(**body)
@@ -251,8 +289,15 @@ class DeleteProjectView(View):
     
     def delete(self, request, project_id):
         try:
-            # Get user_id from query params (TODO: should come from authentication)
-            user_id = int(request.GET.get('user_id', 0))
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
             
             # Create request DTO
             delete_request = project_management_interface.DeleteProjectRequest(
@@ -289,9 +334,20 @@ class AddMemberView(View):
     
     def post(self, request, project_id):
         try:
+            # Get user_id from authentication token
+            from .auth_utils import get_user_from_token
+            user_id = get_user_from_token(request)
+            
+            if user_id is None:
+                return JsonResponse(
+                    {"error": {"message": "Authentication required", "code": "AUTHENTICATION_REQUIRED"}},
+                    status=401
+                )
+            
             # Parse JSON body
             body = json.loads(request.body)
             body['project_id'] = int(project_id)
+            body['user_id'] = user_id  # User adding the member
             
             # Create request DTO
             add_request = project_management_interface.AddMemberRequest(**body)
